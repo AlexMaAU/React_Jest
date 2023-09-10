@@ -73,15 +73,20 @@ test('loading should not be rendered', () => {
 
 test('error message should not be visible', () => {
   render(<Login />);
+  // 使用 screen.getByTestId() 函数从虚拟 DOM 中获取一个具有 data-testid 属性值为 'error' 的元素。
   const errorEl = screen.getByTestId('error');
+  // 断言 errorEl 元素默认不可见。
   expect(errorEl).not.toBeVisible();
 });
 
+// 测试 React 组件中的输入框元素是否能够响应用户输入并正确地改变其值
 test('username input should change', () => {
   render(<Login />);
   const usernameInputEl = screen.getByPlaceholderText(/username/i);
   const testValue = 'test';
-
+  // 使用 @testing-library/react 的 fireEvent.change() 函数来模拟用户在输入框中输入值的行为。
+  // 它模拟了用户在 usernameInputEl 输入框中输入了 testValue。
+  // { target: { value: testValue } }：这是一个事件对象的配置，事件对象（Event Object）通常包含一个属性叫做 target，它指向触发事件的DOM元素，它模拟了一个包含 value 属性的事件对象。value 属性用于表示输入框的当前值。
   fireEvent.change(usernameInputEl, { target: { value: testValue } });
   expect(usernameInputEl.value).toBe(testValue);
 });
@@ -109,21 +114,26 @@ test('button should not be disabled when inputs exist', () => {
   expect(buttonEl).not.toBeDisabled();
 });
 
+// 测试了在点击按钮后，是否会显示一个带有 "please wait" 文本的加载状态
 test('loading should be rendered when click', () => {
   render(<Login />);
+  // 从虚拟 DOM 中获取一个按钮元素
   const buttonEl = screen.getByRole('button');
+  // 需要先从虚拟DOM中获取到要测试的元素
   const usernameInputEl = screen.getByPlaceholderText(/username/i);
   const passwordInputEl = screen.getByPlaceholderText(/password/i);
 
   const testValue = 'test';
-
+  // 模拟用户在用户名输入框和密码输入框中输入了 testValue，即 'test'。这模拟了用户输入用户名和密码的操作。
   fireEvent.change(usernameInputEl, { target: { value: testValue } });
   fireEvent.change(passwordInputEl, { target: { value: testValue } });
+  // 使用 fireEvent.click() 函数模拟用户点击按钮的操作，触发按钮的点击事件。
   fireEvent.click(buttonEl);
-
+  // 断言 buttonEl 元素是否包含文本内容匹配正则表达式 /please wait/i。如果按钮元素的文本内容包含 "please wait" 字符串，测试将通过；如果不包含，测试将失败，表明加载状态的渲染与预期不符。
   expect(buttonEl).toHaveTextContent(/please wait/i);
 });
 
+// 测试 React 组件中的交互行为的测试用例，特别是测试在执行某个操作后，是否会在一定时间后，不再显示加载状态的文本 "please wait"。
 test('loading should not be rendered after fetching', async () => {
   render(<Login />);
   const buttonEl = screen.getByRole('button');
@@ -135,7 +145,8 @@ test('loading should not be rendered after fetching', async () => {
   fireEvent.change(usernameInputEl, { target: { value: testValue } });
   fireEvent.change(passwordInputEl, { target: { value: testValue } });
   fireEvent.click(buttonEl);
-
+  // 使用 await 关键字，等待一定时间（或者等待特定条件满足）。waitFor() 函数是一个辅助函数，它用于等待某个条件成立。
+  // 在这里，我们等待一个条件：期望 buttonEl 元素不再包含文本内容匹配正则表达式 /please wait/i，即不再显示加载状态文本 "please wait"。
   await waitFor(() => expect(buttonEl).not.toHaveTextContent(/please wait/i));
 });
 
@@ -151,6 +162,9 @@ test('user should be rendered after fetching', async () => {
   fireEvent.change(passwordInputEl, { target: { value: testValue } });
   fireEvent.click(buttonEl);
 
+  // 使用 screen.findByText() 函数等待页面上出现包含文本 "John" 的元素。
+  // 这是一个异步操作，会等待一定时间直到找到匹配的元素。一旦找到符合条件的元素，它将赋值给 userItem 变量。
+  // await screen.findByText('John') 的目的不是要查找实际存在于页面上的文本 "John"，而是要模拟在异步操作后，Login 组件会获取用户数据并将用户名 "John" 渲染到界面上。
   const userItem = await screen.findByText('John');
 
   expect(userItem).toBeInTheDocument();
